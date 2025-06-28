@@ -4,11 +4,11 @@ const ChatMessage = require('../models/ChatMessage.js');
 const sendMessage = async (req, res) => {
   try {
     const { receiverId, message } = req.body;
-    const senderId = req.user.id; // viene del authMiddleware
+    const senderId = req.user.id; // desde JWT
 
     const newMessage = new ChatMessage({
-      senderId,
-      receiverId,
+      sender: senderId,
+      receiver: receiverId,
       message
     });
 
@@ -21,7 +21,7 @@ const sendMessage = async (req, res) => {
   }
 };
 
-// Obtener conversación con un usuario
+// Obtener conversación entre dos usuarios
 const getMessages = async (req, res) => {
   try {
     const senderId = req.user.id;
@@ -29,10 +29,10 @@ const getMessages = async (req, res) => {
 
     const messages = await ChatMessage.find({
       $or: [
-        { senderId, receiverId },
-        { senderId: receiverId, receiverId: senderId }
+        { sender: senderId, receiver: receiverId },
+        { sender: receiverId, receiver: senderId }
       ]
-    }).sort({ sentAt: 1 }); // ordenar por fecha ascendente
+    }).sort({ timestamp: 1 });
 
     res.json({ success: true, data: messages });
   } catch (err) {

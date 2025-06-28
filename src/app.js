@@ -24,8 +24,8 @@ app.use(express.json());
 // MongoDB connection
 mongoose
   .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('✅ Conect to MongoDB'))
-  .catch((err) => console.error('❌ Error conection MongoDB:', err.message));
+  .then(() => console.log('✅ Connected to MongoDB'))
+  .catch((err) => console.error('❌ Error connecting to MongoDB:', err.message));
 
 // Swagger setup
 const swaggerOptions = {
@@ -34,7 +34,7 @@ const swaggerOptions = {
     info: {
       title: 'Chat Service API',
       version: '1.0.0',
-      description: 'API from microservice Chat PetConnect',
+      description: 'PetConnect Chat Microservice API',
     },
   },
   apis: ['./routes/*.js'],
@@ -43,14 +43,14 @@ const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Rutas
-app.use('/messages', chatRoutes);
+app.use('/api/chat', chatRoutes);
 
 // WebSocket
 io.on('connection', (socket) => {
-  console.log('🟢 Nuevo cliente conectado:', socket.id);
+  console.log('🟢 Connected client:', socket.id);
 
   socket.on('sendMessage', (message) => {
-    console.log('📩 Mensaje recibido vía WebSocket:', message);
+    console.log('📩 Message received via WebSocket:', message);
     io.emit('receiveMessage', message);
   });
 
@@ -62,5 +62,5 @@ io.on('connection', (socket) => {
 // Arranque del servidor
 const PORT = process.env.PORT || 3004;
 server.listen(PORT, () => {
-  console.log(`🚀 Chat Service corriendo en puerto ${PORT}`);
+  console.log(`🚀 Chat Service running on the port ${PORT}`);
 });
