@@ -1,20 +1,27 @@
-# Usamos una imagen oficial de Node.js
-FROM node:18
+# Etapa 1: Builder - solo dependencias necesarias
+FROM node:18-alpine AS builder
 
-# Creamos el directorio de la app
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# Copiamos package.json y package-lock.json
+# Copiar los archivos de dependencias
 COPY package*.json ./
 
-# Instalamos dependencias
-RUN npm install
+# Instalar solo dependencias necesarias para producción
+RUN npm install --only=production
 
-# Copiamos el resto del código
+# Copiar el resto del código
 COPY . .
 
-# Exponemos el puerto que usará el servicio (3004 para chat-service)
+# Etapa 2: Imagen final optimizada
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copiar solo lo necesario desde la etapa anterior
+COPY --from=builder /app /app
+
+# Exponer el puerto del microservicio
 EXPOSE 3004
 
-# Comando por defecto
-CMD ["npm", "start"]
+# Comando de inicio
+CMD ["node", "src/app.js"]
